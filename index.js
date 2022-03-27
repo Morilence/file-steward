@@ -469,7 +469,10 @@ module.exports = {
                 _assert(this.isIncludeSync(destPath), `The path "${destPath}" is beyond the steward's jurisdiction.`);
                 if (_isDirSync(srcPath)) {
                     _assert(
-                        p.relative(destPath, srcPath).length == 0 || p.relative(destPath, srcPath).indexOf("..") == 0,
+                        !(
+                            p.relative(destPath, srcPath).length == 0 ||
+                            p.relative(destPath, srcPath).indexOf("..") == 0
+                        ),
                         `Can not copy ${srcPath} to a subdirectory of self.`
                     );
                     _assert(_copyDirSync(srcPath, destPath), `Failed to copy directory "${srcPath}" to "${destPath}".`);
@@ -500,7 +503,10 @@ module.exports = {
                 _assert(this.isIncludeSync(destPath), `The path "${destPath}" is beyond the steward's jurisdiction.`);
                 if (_isDirSync(srcPath)) {
                     _assert(
-                        p.relative(destPath, srcPath).length == 0 || p.relative(destPath, srcPath).indexOf("..") == 0,
+                        !(
+                            p.relative(destPath, srcPath).length == 0 ||
+                            p.relative(destPath, srcPath).indexOf("..") == 0
+                        ),
                         `Can not copy ${srcPath} to a subdirectory of self.`
                     );
                     _assert(
@@ -576,7 +582,10 @@ module.exports = {
                 _assert(this.isIncludeSync(destPath), `The path "${destPath}" is beyond the steward's jurisdiction.`);
                 if (_isDirSync(srcPath)) {
                     _assert(
-                        p.relative(destPath, srcPath).length == 0 || p.relative(destPath, srcPath).indexOf("..") == 0,
+                        !(
+                            p.relative(destPath, srcPath).length == 0 ||
+                            p.relative(destPath, srcPath).indexOf("..") == 0
+                        ),
                         `Can not cut ${srcPath} to a subdirectory of self.`
                     );
                     _assert(_cutDirSync(srcPath, destPath), `Failed to cut directory "${srcPath}" to "${destPath}".`);
@@ -607,7 +616,10 @@ module.exports = {
                 _assert(this.isIncludeSync(destPath), `The path "${destPath}" is beyond the steward's jurisdiction.`);
                 if (_isDirSync(srcPath)) {
                     _assert(
-                        p.relative(destPath, srcPath).length == 0 || p.relative(destPath, srcPath).indexOf("..") == 0,
+                        !(
+                            p.relative(destPath, srcPath).length == 0 ||
+                            p.relative(destPath, srcPath).indexOf("..") == 0
+                        ),
                         `Can not cut ${srcPath} to a subdirectory of self.`
                     );
                     _assert(
