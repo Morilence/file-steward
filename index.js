@@ -473,7 +473,7 @@ module.exports = {
                             p.relative(destPath, srcPath).length == 0 ||
                             p.relative(destPath, srcPath).indexOf("..") == 0
                         ),
-                        `Can not copy ${srcPath} to a subdirectory of self.`
+                        `Can not copy "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(_copyDirSync(srcPath, destPath), `Failed to copy directory "${srcPath}" to "${destPath}".`);
                 } else if (_isFileSync(srcPath)) {
@@ -507,7 +507,7 @@ module.exports = {
                             p.relative(destPath, srcPath).length == 0 ||
                             p.relative(destPath, srcPath).indexOf("..") == 0
                         ),
-                        `Can not copy ${srcPath} to a subdirectory of self.`
+                        `Can not copy "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(
                         await _copyDir(srcPath, destPath, options),
@@ -586,7 +586,7 @@ module.exports = {
                             p.relative(destPath, srcPath).length == 0 ||
                             p.relative(destPath, srcPath).indexOf("..") == 0
                         ),
-                        `Can not cut ${srcPath} to a subdirectory of self.`
+                        `Can not cut "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(_cutDirSync(srcPath, destPath), `Failed to cut directory "${srcPath}" to "${destPath}".`);
                 } else if (_isFileSync(srcPath)) {
@@ -620,7 +620,7 @@ module.exports = {
                             p.relative(destPath, srcPath).length == 0 ||
                             p.relative(destPath, srcPath).indexOf("..") == 0
                         ),
-                        `Can not cut ${srcPath} to a subdirectory of self.`
+                        `Can not cut "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(
                         await _cutDir(srcPath, destPath, options),
