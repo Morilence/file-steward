@@ -779,6 +779,14 @@ module.exports = {
                                 }
                             }
                             break;
+                        case OP.RENAME:
+                            {
+                                const { oldPath, newPath } = list[i];
+                                _assert(oldPath != undefined, 'The "oldPath" key in item of the list must be given.');
+                                _assert(newPath != undefined, 'The "newPath" key in item of the list must be given.');
+                                this.renameSync(oldPath, newPath);
+                            }
+                            break;
                         default:
                         // Unknown operation items will not be executed.
                     }
@@ -855,6 +863,14 @@ module.exports = {
                                 } else {
                                     await this.remove(path);
                                 }
+                            }
+                            break;
+                        case OP.RENAME:
+                            {
+                                const { oldPath, newPath } = list[i];
+                                _assert(oldPath != undefined, 'The "oldPath" key in item of the list must be given.');
+                                _assert(newPath != undefined, 'The "newPath" key in item of the list must be given.');
+                                this.rename(oldPath, newPath);
                             }
                             break;
                         default:
