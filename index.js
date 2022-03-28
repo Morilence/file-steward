@@ -274,6 +274,7 @@ module.exports = {
                 if (await _pipe(fs.createReadStream(srcPath), fs.createWriteStream(destPath))) {
                     try {
                         await fs.promises.rm(srcPath, { force: true });
+                        return true;
                     } catch (err) {
                         return false;
                     }
