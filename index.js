@@ -6,6 +6,7 @@ const OP = {
     COPY: 1,
     REMOVE: 2,
     CUT: 3,
+    RENAME: 4,
 };
 
 const TYPE = {
@@ -305,6 +306,22 @@ module.exports = {
             }
         }
 
+        function _renameSync(oldPath, newPath) {
+            try {
+                fs.renameSync(oldPath, newPath);
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function _rename(oldPath, newPath) {
+            try {
+                await fs.promises.rename(oldPath, newPath);
+            } catch (err) {
+                return false;
+            }
+        }
+
         return class FileSteward {
             constructor(path) {
                 this.root = null;
@@ -471,7 +488,12 @@ module.exports = {
                     _assert(
                         !(
                             p.relative(destPath, srcPath).length == 0 ||
-                            p.relative(destPath, srcPath).indexOf("..") == 0
+                            !p
+                                .relative(destPath, srcPath)
+                                .split(p.sep)
+                                .some(item => {
+                                    return item != "..";
+                                })
                         ),
                         `Can not copy "${srcPath}" to a subdirectory of self.`
                     );
@@ -505,7 +527,12 @@ module.exports = {
                     _assert(
                         !(
                             p.relative(destPath, srcPath).length == 0 ||
-                            p.relative(destPath, srcPath).indexOf("..") == 0
+                            !p
+                                .relative(destPath, srcPath)
+                                .split(p.sep)
+                                .some(item => {
+                                    return item != "..";
+                                })
                         ),
                         `Can not copy "${srcPath}" to a subdirectory of self.`
                     );
@@ -584,7 +611,12 @@ module.exports = {
                     _assert(
                         !(
                             p.relative(destPath, srcPath).length == 0 ||
-                            p.relative(destPath, srcPath).indexOf("..") == 0
+                            !p
+                                .relative(destPath, srcPath)
+                                .split(p.sep)
+                                .some(item => {
+                                    return item != "..";
+                                })
                         ),
                         `Can not cut "${srcPath}" to a subdirectory of self.`
                     );
@@ -618,7 +650,12 @@ module.exports = {
                     _assert(
                         !(
                             p.relative(destPath, srcPath).length == 0 ||
-                            p.relative(destPath, srcPath).indexOf("..") == 0
+                            !p
+                                .relative(destPath, srcPath)
+                                .split(p.sep)
+                                .some(item => {
+                                    return item != "..";
+                                })
                         ),
                         `Can not cut "${srcPath}" to a subdirectory of self.`
                     );
@@ -638,6 +675,44 @@ module.exports = {
                 } else {
                     _assert(false, "Other types are not currently supported.");
                 }
+            }
+
+            /**
+             * @param {String} oldPath
+             * @param {String} newPath
+             * @description Rename a file/directory synchronously.
+             */
+            renameSync(oldPath, newPath) {
+                oldPath = p.resolve(this.root, oldPath);
+                newPath = p.resolve(this.root, newPath);
+                _assert(
+                    this.isExistSync(oldPath),
+                    `The file/directory pointed by the path "${oldPath}" does not exist.`
+                );
+                _assert(
+                    p.dirname(oldPath) == p.dirname(newPath),
+                    `The parent paths between "${oldPath}" and "${newPath}" do not match.`
+                );
+                _renameSync(oldPath, newPath);
+            }
+
+            /**
+             * @param {String} oldPath
+             * @param {String} newPath
+             * @description Rename a file/directory asynchronously.
+             */
+            async rename(oldPath, newPath) {
+                oldPath = p.resolve(this.root, oldPath);
+                newPath = p.resolve(this.root, newPath);
+                _assert(
+                    this.isExistSync(oldPath),
+                    `The file/directory pointed by the path "${oldPath}" does not exist.`
+                );
+                _assert(
+                    p.dirname(oldPath) == p.dirname(newPath),
+                    `The parent paths between "${oldPath}" and "${newPath}" do not match.`
+                );
+                await _rename(oldPath, newPath);
             }
 
             /**
