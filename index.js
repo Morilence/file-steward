@@ -882,7 +882,7 @@ module.exports = {
                                     const { oldPath, newPath } = list[i];
                                     _assert(oldPath != undefined, 'The "oldPath" key must be given.');
                                     _assert(newPath != undefined, 'The "newPath" key must be given.');
-                                    this.rename(oldPath, newPath);
+                                    await this.rename(oldPath, newPath);
                                 }
                                 break;
                             default:
