@@ -723,73 +723,83 @@ module.exports = {
             bulkSync(list) {
                 _assert(list instanceof Array, 'The "list" argument must be of type array.');
                 for (let i = 0; i < list.length; i++) {
-                    _assert(list[i] instanceof Object, "The item in the list must be of type object.");
-                    const { op } = list[i];
-                    _assert(op != undefined, 'The "op" key in item of the list must be given.');
-                    switch (op) {
-                        case OP.CREATE:
-                            {
-                                const { path, type, data, options } = list[i];
-                                _assert(path != undefined, 'The "path" key in item of the list must be given.');
-                                _assert(type != undefined, 'The "type" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    if (type == TYPE.DIRECTORY) {
-                                        this.createDirSync(path, options);
-                                    } else if (type == TYPE.FILE) {
-                                        _assert(data != undefined, 'The "data" key in item of the list must be given.');
-                                        this.createFileSync(path, data, options);
+                    try {
+                        _assert(list[i] instanceof Object, "The item must be of type object.");
+                        const { op } = list[i];
+                        _assert(op != undefined, 'The "op" key must be given.');
+                        switch (op) {
+                            case OP.CREATE:
+                                {
+                                    const { path, type, data, options } = list[i];
+                                    _assert(path != undefined, 'The "path" key must be given.');
+                                    _assert(type != undefined, 'The "type" key must be given.');
+                                    if (options != undefined) {
+                                        if (type == TYPE.DIRECTORY) {
+                                            this.createDirSync(path, options);
+                                        } else if (type == TYPE.FILE) {
+                                            _assert(data != undefined, 'The "data" key must be given.');
+                                            this.createFileSync(path, data, options);
+                                        } else {
+                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        }
                                     } else {
-                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
-                                    }
-                                } else {
-                                    if (type == TYPE.DIRECTORY) {
-                                        this.createDirSync(path);
-                                    } else if (type == TYPE.FILE) {
-                                        _assert(data != undefined, 'The "data" key in item of the list must be given.');
-                                        this.createFileSync(path, data);
-                                    } else {
-                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        if (type == TYPE.DIRECTORY) {
+                                            this.createDirSync(path);
+                                        } else if (type == TYPE.FILE) {
+                                            _assert(data != undefined, 'The "data" key must be given.');
+                                            this.createFileSync(path, data);
+                                        } else {
+                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        }
                                     }
                                 }
-                            }
-                            break;
-                        case OP.COPY:
-                            {
-                                const { srcPath, destPath } = list[i];
-                                _assert(srcPath != undefined, 'The "srcPath" key in item of the list must be given.');
-                                _assert(destPath != undefined, 'The "destPath" key in item of the list must be given.');
-                                this.copySync(srcPath, destPath);
-                            }
-                            break;
-                        case OP.CUT:
-                            {
-                                const { srcPath, destPath } = list[i];
-                                _assert(srcPath != undefined, 'The "srcPath" key in item of the list must be given.');
-                                _assert(destPath != undefined, 'The "destPath" key in item of the list must be given.');
-                                this.cutSync(srcPath, destPath);
-                            }
-                            break;
-                        case OP.REMOVE:
-                            {
-                                const { path, options } = list[i];
-                                _assert(path != undefined, 'The "path" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    this.removeSync(path, options);
-                                } else {
-                                    this.removeSync(path);
+                                break;
+                            case OP.COPY:
+                                {
+                                    const { srcPath, destPath } = list[i];
+                                    _assert(srcPath != undefined, 'The "srcPath" key must be given.');
+                                    _assert(destPath != undefined, 'The "destPath" key must be given.');
+                                    this.copySync(srcPath, destPath);
                                 }
-                            }
-                            break;
-                        case OP.RENAME:
-                            {
-                                const { oldPath, newPath } = list[i];
-                                _assert(oldPath != undefined, 'The "oldPath" key in item of the list must be given.');
-                                _assert(newPath != undefined, 'The "newPath" key in item of the list must be given.');
-                                this.renameSync(oldPath, newPath);
-                            }
-                            break;
-                        default:
-                        // Unknown operation items will not be executed.
+                                break;
+                            case OP.CUT:
+                                {
+                                    const { srcPath, destPath } = list[i];
+                                    _assert(srcPath != undefined, 'The "srcPath" key must be given.');
+                                    _assert(destPath != undefined, 'The "destPath" key must be given.');
+                                    this.cutSync(srcPath, destPath);
+                                }
+                                break;
+                            case OP.REMOVE:
+                                {
+                                    const { path, options } = list[i];
+                                    _assert(path != undefined, 'The "path" key must be given.');
+                                    if (options != undefined) {
+                                        this.removeSync(path, options);
+                                    } else {
+                                        this.removeSync(path);
+                                    }
+                                }
+                                break;
+                            case OP.RENAME:
+                                {
+                                    const { oldPath, newPath } = list[i];
+                                    _assert(oldPath != undefined, 'The "oldPath" key must be given.');
+                                    _assert(newPath != undefined, 'The "newPath" key must be given.');
+                                    this.renameSync(oldPath, newPath);
+                                }
+                                break;
+                            default:
+                            // Unknown operation items will not be executed.
+                        }
+                    } catch (err) {
+                        _assert(
+                            false,
+                            `${(err.message.slice(-1) == "."
+                                ? err.message.slice(0, -1)
+                                : err.message
+                            ).trim()} (at list[${i}]).`
+                        );
                     }
                 }
             }
@@ -801,81 +811,91 @@ module.exports = {
             async bulk(list) {
                 _assert(list instanceof Array, 'The "list" argument must be of type array.');
                 for (let i = 0; i < list.length; i++) {
-                    _assert(list[i] instanceof Object, "The item in the list must be of type object.");
-                    const { op } = list[i];
-                    _assert(op != undefined, 'The "op" key in item of the list must be given.');
-                    switch (op) {
-                        case OP.CREATE:
-                            {
-                                const { path, type, data, options } = list[i];
-                                _assert(path != undefined, 'The "path" key in item of the list must be given.');
-                                _assert(type != undefined, 'The "type" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    if (type == TYPE.DIRECTORY) {
-                                        await this.createDir(path, options);
-                                    } else if (type == TYPE.FILE) {
-                                        _assert(data != undefined, 'The "data" key in item of the list must be given.');
-                                        await this.createFile(path, data, options);
+                    try {
+                        _assert(list[i] instanceof Object, "The item must be of type object.");
+                        const { op } = list[i];
+                        _assert(op != undefined, 'The "op" key must be given.');
+                        switch (op) {
+                            case OP.CREATE:
+                                {
+                                    const { path, type, data, options } = list[i];
+                                    _assert(path != undefined, 'The "path" key must be given.');
+                                    _assert(type != undefined, 'The "type" key must be given.');
+                                    if (options != undefined) {
+                                        if (type == TYPE.DIRECTORY) {
+                                            await this.createDir(path, options);
+                                        } else if (type == TYPE.FILE) {
+                                            _assert(data != undefined, 'The "data" key must be given.');
+                                            await this.createFile(path, data, options);
+                                        } else {
+                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        }
                                     } else {
-                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        if (type == TYPE.DIRECTORY) {
+                                            await this.createDir(path);
+                                        } else if (type == TYPE.FILE) {
+                                            _assert(data != undefined, 'The "data" key must be given.');
+                                            await this.createFile(path, data);
+                                        } else {
+                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        }
                                     }
-                                } else {
-                                    if (type == TYPE.DIRECTORY) {
-                                        await this.createDir(path);
-                                    } else if (type == TYPE.FILE) {
-                                        _assert(data != undefined, 'The "data" key in item of the list must be given.');
-                                        await this.createFile(path, data);
+                                }
+                                break;
+                            case OP.COPY:
+                                {
+                                    const { srcPath, destPath, options } = list[i];
+                                    _assert(srcPath != undefined, 'The "srcPath" key must be given.');
+                                    _assert(destPath != undefined, 'The "destPath" key must be given.');
+                                    if (options != undefined) {
+                                        await this.copy(srcPath, destPath, options);
                                     } else {
-                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
+                                        await this.copy(srcPath, destPath);
                                     }
                                 }
-                            }
-                            break;
-                        case OP.COPY:
-                            {
-                                const { srcPath, destPath, options } = list[i];
-                                _assert(srcPath != undefined, 'The "srcPath" key in item of the list must be given.');
-                                _assert(destPath != undefined, 'The "destPath" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    await this.copy(srcPath, destPath, options);
-                                } else {
-                                    await this.copy(srcPath, destPath);
+                                break;
+                            case OP.CUT:
+                                {
+                                    const { srcPath, destPath, options } = list[i];
+                                    _assert(srcPath != undefined, 'The "srcPath" key must be given.');
+                                    _assert(destPath != undefined, 'The "destPath" key must be given.');
+                                    if (options != undefined) {
+                                        await this.cut(srcPath, destPath, options);
+                                    } else {
+                                        await this.cut(srcPath, destPath);
+                                    }
                                 }
-                            }
-                            break;
-                        case OP.CUT:
-                            {
-                                const { srcPath, destPath, options } = list[i];
-                                _assert(srcPath != undefined, 'The "srcPath" key in item of the list must be given.');
-                                _assert(destPath != undefined, 'The "destPath" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    await this.cut(srcPath, destPath, options);
-                                } else {
-                                    await this.cut(srcPath, destPath);
+                                break;
+                            case OP.REMOVE:
+                                {
+                                    const { path, options } = list[i];
+                                    _assert(path != undefined, 'The "path" key must be given.');
+                                    if (options != undefined) {
+                                        await this.remove(path, options);
+                                    } else {
+                                        await this.remove(path);
+                                    }
                                 }
-                            }
-                            break;
-                        case OP.REMOVE:
-                            {
-                                const { path, options } = list[i];
-                                _assert(path != undefined, 'The "path" key in item of the list must be given.');
-                                if (options != undefined) {
-                                    await this.remove(path, options);
-                                } else {
-                                    await this.remove(path);
+                                break;
+                            case OP.RENAME:
+                                {
+                                    const { oldPath, newPath } = list[i];
+                                    _assert(oldPath != undefined, 'The "oldPath" key must be given.');
+                                    _assert(newPath != undefined, 'The "newPath" key must be given.');
+                                    this.rename(oldPath, newPath);
                                 }
-                            }
-                            break;
-                        case OP.RENAME:
-                            {
-                                const { oldPath, newPath } = list[i];
-                                _assert(oldPath != undefined, 'The "oldPath" key in item of the list must be given.');
-                                _assert(newPath != undefined, 'The "newPath" key in item of the list must be given.');
-                                this.rename(oldPath, newPath);
-                            }
-                            break;
-                        default:
-                        // Unknown operation items will not be executed.
+                                break;
+                            default:
+                            // Unknown operation items will not be executed.
+                        }
+                    } catch (err) {
+                        _assert(
+                            false,
+                            `${(err.message.slice(-1) == "."
+                                ? err.message.slice(0, -1)
+                                : err.message
+                            ).trim()} (at list[${i}]).`
+                        );
                     }
                 }
             }
