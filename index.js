@@ -470,7 +470,7 @@ module.exports = (function () {
          * @description Create a file synchronously.
          */
         createFileSync(path, data, options = { cover: true }) {
-            const opts = { recursive: true };
+            const opts = { cover: true };
             Object.assign(opts, options);
 
             path = p.resolve(this.root, path);
@@ -490,7 +490,7 @@ module.exports = (function () {
          * @description Create a file asynchronously (supports receiving a fs.ReadStream as the data).
          */
         async createFile(path, data, options = { cover: true }) {
-            const opts = { recursive: true };
+            const opts = { cover: true };
             Object.assign(opts, options);
 
             path = p.resolve(this.root, path);
