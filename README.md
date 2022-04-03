@@ -1,3 +1,0 @@
-# File Steward
-
-The author is lazy to write a readme...
