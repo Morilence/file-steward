@@ -408,7 +408,7 @@ module.exports = (function () {
                 obj.type = TYPE.CHARACTER_DEVICE;
             } else if (obj.stat.isDirectory()) {
                 obj.type = TYPE.DIRECTORY;
-                if (options.children) {
+                if (opts.children) {
                     obj.children = await _list.bind(this)(path, opts);
                 }
             } else if (obj.stat.isFIFO()) {
