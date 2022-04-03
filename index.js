@@ -381,39 +381,41 @@ module.exports = {
 
             /**
              * @param {String} path
-             * @returns {Array|Object}
-             * @description Browse the path asynchronously.
+             * @returns {Object}
+             * @description Show the info of the file/directory pointed by the path asynchronously.
              */
-            async browse(path = this.root, options = { relative: true, recursive: true }) {
+            async info(path = this.root, options = { relative: true, children: false, recursive: false }) {
+                const opts = { relative: true, children: false, recursive: false };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
-                if (path == this.root) {
-                    return await _list.bind(this)(path, options);
-                } else {
+                if (path != this.root) {
                     _assert(this.isExistSync(path), `The file/directory pointed by the path "${path}" does not exist.`);
-                    if (_isDirSync(path)) {
-                        return await _list.bind(this)(path, options);
-                    } else {
-                        const obj = {
-                            path,
-                            stat: _statSync(path),
-                            type: -1,
-                        };
-                        if (obj.stat.isBlockDevice()) {
-                            obj.type = TYPE.BLOCK_DEVICE;
-                        } else if (obj.stat.isCharacterDevice()) {
-                            obj.type = TYPE.CHARACTER_DEVICE;
-                        } else if (obj.stat.isFIFO()) {
-                            obj.type = TYPE.FIFO;
-                        } else if (obj.stat.isFile()) {
-                            obj.type = TYPE.FILE;
-                        } else if (obj.stat.isSocket()) {
-                            obj.type = TYPE.SOCKET;
-                        } else if (obj.stat.isSymbolicLink()) {
-                            obj.type = TYPE.SYMBOLIC_LINK;
-                        }
-                        return obj;
-                    }
                 }
+                const obj = {
+                    path: opts.relative ? p.relative(this.root, path) || p.sep : path,
+                    stat: _statSync(path),
+                    type: -1,
+                };
+                if (obj.stat.isBlockDevice()) {
+                    obj.type = TYPE.BLOCK_DEVICE;
+                } else if (obj.stat.isCharacterDevice()) {
+                    obj.type = TYPE.CHARACTER_DEVICE;
+                } else if (obj.stat.isDirectory()) {
+                    obj.type = TYPE.DIRECTORY;
+                    if (options.children) {
+                        obj.children = await _list.bind(this)(path, opts);
+                    }
+                } else if (obj.stat.isFIFO()) {
+                    obj.type = TYPE.FIFO;
+                } else if (obj.stat.isFile()) {
+                    obj.type = TYPE.FILE;
+                } else if (obj.stat.isSocket()) {
+                    obj.type = TYPE.SOCKET;
+                } else if (obj.stat.isSymbolicLink()) {
+                    obj.type = TYPE.SYMBOLIC_LINK;
+                }
+                return obj;
             }
 
             /**
@@ -422,9 +424,18 @@ module.exports = {
              * @description Create a directory synchronously (if the directory already exists, nothing will be done).
              */
             createDirSync(path, options = { recursive: true }) {
+                const opts = { recursive: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
-                _assert(_createDirSync(path, options), `Failed to create the directory "${path}".`);
+                if (!opts.recursive) {
+                    _assert(
+                        p.dirname(path) == this.root ? true : this.isExistSync(p.dirname(path)),
+                        `The parent directory of the path "${path}" does not exist.`
+                    );
+                }
+                _assert(_createDirSync(path, opts), `Failed to create the directory "${path}".`);
             }
 
             /**
@@ -433,9 +444,18 @@ module.exports = {
              * @description Create a directory asynchronously (if the directory already exists, nothing will be done).
              */
             async createDir(path, options = { recursive: true }) {
+                const opts = { recursive: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
-                _assert(await _createDir(path, options), `Failed to create the directory "${path}".`);
+                if (!opts.recursive) {
+                    _assert(
+                        p.dirname(path) == this.root ? true : this.isExistSync(p.dirname(path)),
+                        `The parent directory of the path "${path}" does not exist.`
+                    );
+                }
+                _assert(await _createDir(path, opts), `Failed to create the directory "${path}".`);
             }
 
             /**
@@ -445,12 +465,15 @@ module.exports = {
              * @description Create a file synchronously.
              */
             createFileSync(path, data, options = { cover: true }) {
+                const opts = { recursive: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
                 const isExist = _isExistSync(path);
-                if (!isExist || (isExist && options.cover)) {
+                if (!isExist || (isExist && opts.cover)) {
                     _assert(_createFileSync(path, data), `Failed to create the file "${path}".`);
-                } else if (isExist && !options.cover) {
+                } else if (isExist && !opts.cover) {
                     _assert(false, `The file pointed by the path "${path}" already exists.`);
                 }
             }
@@ -462,12 +485,15 @@ module.exports = {
              * @description Create a file asynchronously (supports passing a fs.ReadStream as the data).
              */
             async createFile(path, data, options = { cover: true }) {
+                const opts = { recursive: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
                 const isExist = _isExistSync(path);
-                if (!isExist || (isExist && options.cover)) {
+                if (!isExist || (isExist && opts.cover)) {
                     _assert(await _createFile(path, data), `Failed to create the file "${path}".`);
-                } else if (isExist && !options.cover) {
+                } else if (isExist && !opts.cover) {
                     _assert(false, `The file pointed by the path "${path}" already exists.`);
                 }
             }
@@ -517,6 +543,9 @@ module.exports = {
              * @description Copy a file/directory from it's source path to the destination path asynchronously (supports using stream mode).
              */
             async copy(srcPath, destPath, options = { stream: true }) {
+                const opts = { stream: true };
+                Object.assign(opts, options);
+
                 srcPath = p.resolve(this.root, srcPath);
                 destPath = p.resolve(this.root, destPath);
                 _assert(
@@ -538,7 +567,7 @@ module.exports = {
                         `Can not copy "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(
-                        await _copyDir(srcPath, destPath, options),
+                        await _copyDir(srcPath, destPath, opts),
                         `Failed to copy directory "${srcPath}" to "${destPath}".`
                     );
                 } else if (_isFileSync(srcPath)) {
@@ -547,7 +576,7 @@ module.exports = {
                         `Failed to create the parent directory "${p.dirname(destPath)}" of the path "${destPath}".`
                     );
                     _assert(
-                        await _copyFile(srcPath, destPath, options),
+                        await _copyFile(srcPath, destPath, opts),
                         `Failed to copy file "${srcPath}" to "${destPath}".`
                     );
                 } else {
@@ -560,6 +589,9 @@ module.exports = {
              * @description Remove the file/directory synchronously.
              */
             removeSync(path, options = { force: true }) {
+                const opts = { force: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
                 if (_isExistSync(path)) {
@@ -571,7 +603,7 @@ module.exports = {
                         _assert(false, "Other types are not currently supported.");
                     }
                 } else {
-                    _assert(options.force, `The file/directory pointed by the path "${path}" does not exist already.`);
+                    _assert(opts.force, `The file/directory pointed by the path "${path}" does not exist already.`);
                 }
             }
 
@@ -580,6 +612,9 @@ module.exports = {
              * @description Remove the file/directory asynchronously.
              */
             async remove(path, options = { force: true }) {
+                const opts = { force: true };
+                Object.assign(opts, options);
+
                 path = p.resolve(this.root, path);
                 _assert(this.isIncludeSync(path), `The path "${path}" is beyond the steward's jurisdiction.`);
                 if (_isExistSync(path)) {
@@ -591,7 +626,7 @@ module.exports = {
                         _assert(false, "Other types are not currently supported.");
                     }
                 } else {
-                    _assert(options.force, `The file/directory pointed by the path "${path}" does not exist already.`);
+                    _assert(opts.force, `The file/directory pointed by the path "${path}" does not exist already.`);
                 }
             }
 
@@ -639,7 +674,10 @@ module.exports = {
              * @param {Object} options
              * @description Cut a file/directory from it's source path to the destination path asynchronously (supports using stream mode).
              */
-            async cut(srcPath, destPath, options) {
+            async cut(srcPath, destPath, options = { stream: true }) {
+                const opts = { stream: true };
+                Object.assign(opts, options);
+
                 srcPath = p.resolve(this.root, srcPath);
                 destPath = p.resolve(this.root, destPath);
                 _assert(
@@ -661,7 +699,7 @@ module.exports = {
                         `Can not cut "${srcPath}" to a subdirectory of self.`
                     );
                     _assert(
-                        await _cutDir(srcPath, destPath, options),
+                        await _cutDir(srcPath, destPath, opts),
                         `Failed to cut directory "${srcPath}" to "${destPath}".`
                     );
                 } else if (_isFileSync(srcPath)) {
@@ -670,7 +708,7 @@ module.exports = {
                         `Failed to create the parent directory "${p.dirname(destPath)}" of the path "${destPath}".`
                     );
                     _assert(
-                        await _cutFile(srcPath, destPath, options),
+                        await _cutFile(srcPath, destPath, opts),
                         `Failed to cut file "${srcPath}" to "${destPath}".`
                     );
                 } else {
@@ -730,27 +768,17 @@ module.exports = {
                         switch (op) {
                             case OP.CREATE:
                                 {
-                                    const { path, type, data, options } = list[i];
+                                    const { path, type, data } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(path != undefined, 'The "path" key must be given.');
                                     _assert(type != undefined, 'The "type" key must be given.');
-                                    if (options != undefined) {
-                                        if (type == TYPE.DIRECTORY) {
-                                            this.createDirSync(path, options);
-                                        } else if (type == TYPE.FILE) {
-                                            _assert(data != undefined, 'The "data" key must be given.');
-                                            this.createFileSync(path, data, options);
-                                        } else {
-                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
-                                        }
+                                    if (type == TYPE.DIRECTORY) {
+                                        this.createDirSync(path, options);
+                                    } else if (type == TYPE.FILE) {
+                                        _assert(data != undefined, 'The "data" key must be given.');
+                                        this.createFileSync(path, data, options);
                                     } else {
-                                        if (type == TYPE.DIRECTORY) {
-                                            this.createDirSync(path);
-                                        } else if (type == TYPE.FILE) {
-                                            _assert(data != undefined, 'The "data" key must be given.');
-                                            this.createFileSync(path, data);
-                                        } else {
-                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
-                                        }
+                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
                                     }
                                 }
                                 break;
@@ -772,13 +800,10 @@ module.exports = {
                                 break;
                             case OP.REMOVE:
                                 {
-                                    const { path, options } = list[i];
+                                    const { path } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(path != undefined, 'The "path" key must be given.');
-                                    if (options != undefined) {
-                                        this.removeSync(path, options);
-                                    } else {
-                                        this.removeSync(path);
-                                    }
+                                    this.removeSync(path, options);
                                 }
                                 break;
                             case OP.RENAME:
@@ -818,63 +843,44 @@ module.exports = {
                         switch (op) {
                             case OP.CREATE:
                                 {
-                                    const { path, type, data, options } = list[i];
+                                    const { path, type, data } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(path != undefined, 'The "path" key must be given.');
                                     _assert(type != undefined, 'The "type" key must be given.');
-                                    if (options != undefined) {
-                                        if (type == TYPE.DIRECTORY) {
-                                            await this.createDir(path, options);
-                                        } else if (type == TYPE.FILE) {
-                                            _assert(data != undefined, 'The "data" key must be given.');
-                                            await this.createFile(path, data, options);
-                                        } else {
-                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
-                                        }
+                                    if (type == TYPE.DIRECTORY) {
+                                        await this.createDir(path, options);
+                                    } else if (type == TYPE.FILE) {
+                                        _assert(data != undefined, 'The "data" key must be given.');
+                                        await this.createFile(path, data, options);
                                     } else {
-                                        if (type == TYPE.DIRECTORY) {
-                                            await this.createDir(path);
-                                        } else if (type == TYPE.FILE) {
-                                            _assert(data != undefined, 'The "data" key must be given.');
-                                            await this.createFile(path, data);
-                                        } else {
-                                            // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
-                                        }
+                                        // Types other than TYPE.DIRECTORY and TYPE.FILE are not currently supported.
                                     }
                                 }
                                 break;
                             case OP.COPY:
                                 {
-                                    const { srcPath, destPath, options } = list[i];
+                                    const { srcPath, destPath } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(srcPath != undefined, 'The "srcPath" key must be given.');
                                     _assert(destPath != undefined, 'The "destPath" key must be given.');
-                                    if (options != undefined) {
-                                        await this.copy(srcPath, destPath, options);
-                                    } else {
-                                        await this.copy(srcPath, destPath);
-                                    }
+                                    await this.copy(srcPath, destPath, options);
                                 }
                                 break;
                             case OP.CUT:
                                 {
-                                    const { srcPath, destPath, options } = list[i];
+                                    const { srcPath, destPath } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(srcPath != undefined, 'The "srcPath" key must be given.');
                                     _assert(destPath != undefined, 'The "destPath" key must be given.');
-                                    if (options != undefined) {
-                                        await this.cut(srcPath, destPath, options);
-                                    } else {
-                                        await this.cut(srcPath, destPath);
-                                    }
+                                    await this.cut(srcPath, destPath, options);
                                 }
                                 break;
                             case OP.REMOVE:
                                 {
-                                    const { path, options } = list[i];
+                                    const { path } = list[i];
+                                    const options = list[i].options || {};
                                     _assert(path != undefined, 'The "path" key must be given.');
-                                    if (options != undefined) {
-                                        await this.remove(path, options);
-                                    } else {
-                                        await this.remove(path);
-                                    }
+                                    await this.remove(path, options);
                                 }
                                 break;
                             case OP.RENAME:
