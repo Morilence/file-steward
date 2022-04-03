@@ -131,15 +131,15 @@ Rename a file/directory asynchronously.
 #### bulkSync(list)
 
 + list&ensp;[\<object[]\>][object_link]
-  + op&ensp;[\<integer\>][number_link] (refer from [FileSteward.OP](#filestewardop))
-  + [, type]&ensp;[\<integer\>][number_link] (refer from [FileSteward.TYPE](#filestewardtype))
+  + op&ensp;[\<integer\>][number_link]&ensp;(refer from [FileSteward.OP](#filestewardop))
+  + [, type]&ensp;[\<integer\>][number_link]&ensp;(refer from [FileSteward.TYPE](#filestewardtype))
   + [, path]&ensp;[\<string\>][string_link]
   + [, data]&ensp;[\<string\>][string_link] | [\<buffer\>][buffer_link]
   + [, srcPath]&ensp;[\<string\>][string_link]
   + [, destPath]&ensp;[\<string\>][string_link]
   + [, oldPath]&ensp;[\<string\>][string_link]
   + [, newPath]&ensp;[\<string\>][string_link]
-  + [, options]&ensp;[\<object\>][object_link] specific attributes are determined by "op"
+  + [, options]&ensp;[\<object\>][object_link]&ensp;specific attributes are determined by "op"
 + **return**&ensp;[\<undefined\>][undefined_link]
 
 Bulk operations in order synchronously.
@@ -158,15 +158,15 @@ steward.bulkSync([
 #### bulk(list)
 
 + list&ensp;[\<object[]\>][object_link]
-  + op&ensp;[\<integer\>][number_link] (refer from [FileSteward.OP](#filestewardop))
-  + [, type]&ensp;[\<integer\>][number_link] (refer from [FileSteward.TYPE](#filestewardtype))
+  + op&ensp;[\<integer\>][number_link]&ensp;(refer from [FileSteward.OP](#filestewardop))
+  + [, type]&ensp;[\<integer\>][number_link]&ensp;(refer from [FileSteward.TYPE](#filestewardtype))
   + [, path]&ensp;[\<string\>][string_link]
   + [, data]&ensp;[\<string\>][string_link] | [\<buffer\>][buffer_link]
   + [, srcPath]&ensp;[\<string\>][string_link]
   + [, destPath]&ensp;[\<string\>][string_link]
   + [, oldPath]&ensp;[\<string\>][string_link]
   + [, newPath]&ensp;[\<string\>][string_link]
-  + [, options]&ensp;[\<object\>][object_link] specific attributes are determined by "op"
+  + [, options]&ensp;[\<object\>][object_link]&ensp;specific attributes are determined by "op"
 + **return**&ensp;[\<promise\>][promise_link]&ensp;Promise { undefined }
 
 Bulk operations in order asynchronously.
@@ -180,7 +180,7 @@ Bulk operations in order asynchronously.
   + recursive&ensp;[\<boolean\>][boolean_link]&ensp;default: false
 + **return**&ensp;[\<promise\>][promise_link]&ensp;Promise { object }
   + path&ensp;[\<string\>][string_link]
-  + type&ensp;[\<integer\>][number_link] (refer from [FileSteward.TYPE](#filestewardtype))
+  + type&ensp;[\<integer\>][number_link]&ensp;(refer from [FileSteward.TYPE](#filestewardtype))
   + stat&ensp;[\<fs.Stats\>][fsStats_link]
 
 Get the information of the file/directory asynchronously.
