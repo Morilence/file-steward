@@ -147,7 +147,7 @@ Bulk operations in order synchronously.
 **example:**
 
 ```js
-steward.bulk([
+steward.bulkSync([
     { op: FileSteward.OP.CREATE, type: FileSteward.TYPE.DIRECTORY, path: "texts" },
     { op: FileSteward.OP.CREATE, type: FileSteward.TYPE.FILE, path: "texts/hello.txt", data: "Hello world!" },
     { op: FileSteward.OP.COPY, srcPath: "texts/hello.txt", destPath: "texts/hello_copy.txt" },
