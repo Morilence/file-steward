@@ -185,6 +185,20 @@ Bulk operations in order asynchronously.
 
 Get the information of the file/directory asynchronously.
 
+#### isIncludeSync(path)
+
++ path&ensp;[\<string\>][string_link]
++ **return**&ensp;[\<boolean\>][boolean_link]
+
+Whether the path is in the steward's jurisdiction.
+
+#### isExistSync(path)
+
++ path&ensp;[\<string\>][string_link]
++ **return**&ensp;[\<boolean\>][boolean_link]
+
+Whether the file/directory pointed by the path exists in the jurisdiction.
+
 ### Static Constants
 
 #### FileSteward.TYPE
