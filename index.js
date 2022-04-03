@@ -65,7 +65,7 @@ module.exports = {
             for await (const dirent of await fs.promises.opendir(path)) {
                 const obj = {
                     path: options.relative
-                        ? p.relative(this.root, p.resolve(path, dirent.name))
+                        ? p.relative(this.root, p.resolve(path, dirent.name)) || p.sep
                         : p.resolve(path, dirent.name),
                     stat: _statSync(p.resolve(path, dirent.name)),
                     type: -1,
@@ -77,7 +77,7 @@ module.exports = {
                 } else if (dirent.isDirectory()) {
                     obj.type = TYPE.DIRECTORY;
                     if (options.recursive) {
-                        obj.list = await _list.bind(this)(p.resolve(path, dirent.name), options);
+                        obj.children = await _list.bind(this)(p.resolve(path, dirent.name), options);
                     }
                 } else if (dirent.isFIFO()) {
                     obj.type = TYPE.FIFO;
