@@ -1,6 +1,6 @@
 {
     "name": "file-steward",
-    "version": "1.0.15",
+    "version": "1.0.16",
     "description": "Easier file management interface for nodejs.",
     "main": "index.js",
     "scripts": {
